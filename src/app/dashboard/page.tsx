@@ -1,12 +1,34 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import { getExpenses } from "@/db/queries/expenses";
+import { getCategories } from "@/db/queries/categories";
+import { format } from "date-fns";
 
 export default async function DashboardPage() {
   const session = await auth();
 
-  if (!session) {
+  if (!session?.user?.id) {
     redirect("/login");
   }
+
+  const userId = session.user.id;
+  const [expenses, categories] = await Promise.all([
+    getExpenses(userId),
+    getCategories(userId)
+  ]);
+
+  // Create a map for quick category lookup
+  const categoryMap = new Map(categories.map(c => [c.id, c]));
+
+  // Simple stats calculation
+  const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+  const currentMonthExpenses = expenses
+    .filter(exp => {
+      const date = new Date(exp.date);
+      const now = new Date();
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    })
+    .reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-white">
@@ -49,16 +71,21 @@ export default async function DashboardPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto p-6 sm:p-10">
-        <header className="mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2">Dashboard</h1>
-          <p className="text-gray-500 dark:text-zinc-400 font-medium">Welcome back, {session.user?.name?.split(' ')[0]}. Here's what's happening with your money.</p>
+        <header className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">Dashboard</h1>
+            <p className="text-gray-500 dark:text-zinc-400 font-medium">Welcome back, {session.user?.name?.split(' ')[0]}. Here's your financial overview.</p>
+          </div>
+          <button className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-violet-500/20 active:scale-95">
+            + Add Expense
+          </button>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {[
-            { label: "Total Balance", value: "$4,250.00", color: "text-emerald-500" },
-            { label: "Monthly Expenses", value: "$1,120.40", color: "text-rose-500" },
-            { label: "Savings Goal", value: "75%", color: "text-violet-500" }
+            { label: "Total Spent", value: `$${totalExpenses.toFixed(2)}`, color: "text-gray-900 dark:text-white" },
+            { label: "This Month", value: `$${currentMonthExpenses.toFixed(2)}`, color: "text-rose-500" },
+            { label: "Transactions", value: expenses.length.toString(), color: "text-violet-500" }
           ].map((stat, i) => (
             <div key={i} className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-2xl shadow-sm">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
@@ -73,21 +100,25 @@ export default async function DashboardPage() {
             <button className="text-xs font-bold text-violet-600 hover:text-violet-700">View All</button>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-zinc-800">
-            {[
-              { desc: "Grocery Store", category: "Food", amount: "-$85.00", date: "Today" },
-              { desc: "Monthly Rent", category: "Housing", amount: "-$1,200.00", date: "Yesterday" },
-              { desc: "Freelance Payment", category: "Income", amount: "+$2,500.00", date: "Oct 24" }
-            ].map((tx, i) => (
-              <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
-                <div>
-                  <p className="font-bold text-sm">{tx.desc}</p>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{tx.category} • {tx.date}</p>
-                </div>
-                <span className={`font-black text-sm ${tx.amount.startsWith('+') ? 'text-emerald-500' : 'text-gray-900 dark:text-white'}`}>
-                  {tx.amount}
-                </span>
+            {expenses.length === 0 ? (
+              <div className="px-6 py-10 text-center text-gray-500 font-medium">
+                No transactions yet. Start by adding your first expense!
               </div>
-            ))}
+            ) : (
+              expenses.slice(0, 5).map((exp) => (
+                <div key={exp.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                  <div>
+                    <p className="font-bold text-sm">{exp.note || "Expense"}</p>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                      {exp.categoryId ? categoryMap.get(exp.categoryId)?.name : "Uncategorized"} • {format(new Date(exp.date), "MMM dd, yyyy")}
+                    </p>
+                  </div>
+                  <span className="font-black text-sm text-rose-500">
+                    -${parseFloat(exp.amount).toFixed(2)}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </main>
