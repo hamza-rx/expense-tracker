@@ -6,6 +6,7 @@ import { getMonthlyTrends } from "@/db/queries/reports";
 import { format } from "date-fns";
 import MonthlyChart from "@/components/MonthlyChart";
 import { ArrowUpRight, ArrowDownRight, Zap } from "lucide-react";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -42,12 +43,18 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800">
+          <Link 
+            href="/api/reports/export"
+            className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
+          >
             Export Report
-          </button>
-          <button className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-violet-500/20 active:scale-95">
+          </Link>
+          <Link 
+            href="/dashboard/expenses/new"
+            className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-violet-500/20 active:scale-95"
+          >
             + Add Expense
-          </button>
+          </Link>
         </div>
       </header>
 
