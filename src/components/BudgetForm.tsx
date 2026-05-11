@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { budgetSchema, BudgetFormValues } from "@/lib/validations";
 import { createBudgetAction, updateBudgetAction } from "@/lib/actions/budget.actions";
@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Loader2, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import FormSelect from "@/components/FormSelect";
 
 interface BudgetFormProps {
   categories: Category[];
@@ -67,12 +68,12 @@ export default function BudgetForm({ categories, initialData, currency = "USD", 
           <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block">
             Budget Limit
           </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">{currencySymbol}</span>
+          <div className="flex items-center bg-gray-50 dark:bg-zinc-800 rounded-2xl overflow-hidden focus-within:ring-2 ring-violet-500/20 transition-all">
+            <span className="pl-4 pr-2 font-medium text-gray-400 text-xl shrink-0">{currencySymbol}</span>
             <input
               {...form.register("limitAmount")}
               placeholder="0.00"
-              className="w-full bg-gray-50 dark:bg-zinc-800 border-none rounded-2xl py-4 pl-8 pr-4 font-black text-xl outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white"
+              className="flex-1 bg-transparent py-4 pr-4 font-medium text-xl outline-none dark:text-white"
             />
           </div>
           {form.formState.errors.limitAmount && (
@@ -80,20 +81,23 @@ export default function BudgetForm({ categories, initialData, currency = "USD", 
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block">
               Category
             </label>
-            <select
-              {...form.register("categoryId")}
-              className="w-full bg-gray-50 dark:bg-zinc-800 border-none rounded-2xl py-4 px-4 font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white appearance-none"
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormSelect
+                  options={categories.map((c) => ({ label: c.name, value: c.id }))}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select Category"
+                />
+              )}
+            />
             {form.formState.errors.categoryId && (
               <p className="text-rose-500 text-[10px] font-bold mt-1 uppercase tracking-wider">{form.formState.errors.categoryId.message}</p>
             )}
@@ -103,13 +107,20 @@ export default function BudgetForm({ categories, initialData, currency = "USD", 
             <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block">
               Period
             </label>
-            <select
-              {...form.register("period")}
-              className="w-full bg-gray-50 dark:bg-zinc-800 border-none rounded-2xl py-4 px-4 font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white appearance-none"
-            >
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
+            <Controller
+              control={form.control}
+              name="period"
+              render={({ field }) => (
+                <FormSelect
+                  options={[
+                    { label: "Monthly", value: "monthly" },
+                    { label: "Yearly",  value: "yearly" },
+                  ]}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       </div>

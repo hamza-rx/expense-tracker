@@ -5,11 +5,11 @@ import { getCategories } from "@/db/queries/categories";
 import { getMonthlyTrends, getBudgetStatus } from "@/db/queries/reports";
 import { getUserSettings } from "@/db/queries/user";
 import { format } from "date-fns";
-import MonthlyChart from "@/components/MonthlyChart";
+import SpendingTrendCard from "@/components/SpendingTrendCard";
 import { ArrowUpRight, ArrowDownRight, Zap, Target } from "lucide-react";
 import Link from "next/link";
 import { processRecurringExpenses } from "@/lib/recurring-processor";
-import { formatCurrency } from "@/lib/currencies";
+import { formatCurrency, convertFromPKR } from "@/lib/currencies";
 import CurrencySelector from "@/components/CurrencySelector";
 
 export default async function DashboardPage() {
@@ -35,14 +35,18 @@ export default async function DashboardPage() {
   const currency = settings.currency;
   const categoryMap = new Map(categories.map(c => [c.id, c]));
 
-  const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
-  const currentMonthExpenses = expenses
+  // Expenses are stored in PKR. Convert totals to the selected display currency.
+  const totalExpensesPKR = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+  const currentMonthExpensesPKR = expenses
     .filter(exp => {
       const date = new Date(exp.date);
       const now = new Date();
       return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     })
     .reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+
+  const totalExpenses = convertFromPKR(totalExpensesPKR, currency);
+  const currentMonthExpenses = convertFromPKR(currentMonthExpensesPKR, currency);
 
   return (
     <div className="p-6 sm:p-10 space-y-10">
@@ -110,16 +114,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chart Section */}
-        <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-bold text-xl">Spending Trend</h3>
-            <select className="bg-gray-50 dark:bg-zinc-800 border-none rounded-lg text-xs font-bold px-3 py-2 outline-none">
-              <option>Last 6 Months</option>
-              <option>Last Year</option>
-            </select>
-          </div>
-          <MonthlyChart data={monthlyTrends} />
-        </div>
+        <SpendingTrendCard data={monthlyTrends} />
 
         {/* Budget Overview Widget */}
         <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm flex flex-col">
@@ -178,7 +173,7 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <span className="font-black text-sm text-rose-500">
-                    -${parseFloat(exp.amount).toFixed(2)}
+                    -{formatCurrency(convertFromPKR(parseFloat(exp.amount), currency), currency)}
                   </span>
                 </div>
               ))

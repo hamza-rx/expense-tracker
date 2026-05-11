@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { expenseSchema, ExpenseFormValues } from "@/lib/validations";
 import { createExpenseAction, updateExpenseAction } from "@/lib/actions/expense.actions";
@@ -10,6 +10,7 @@ import { Loader2, Plus, Sparkles, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { suggestCategory } from "@/lib/categorizer";
 import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
+import FormSelect from "@/components/FormSelect";
 
 interface ExpenseFormProps {
   categories: Category[];
@@ -99,12 +100,12 @@ export default function ExpenseForm({ categories, initialData, currency = "USD",
           <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block">
             Amount
           </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">{currencySymbol}</span>
+          <div className="flex items-center bg-gray-50 dark:bg-zinc-800 rounded-2xl overflow-hidden focus-within:ring-2 ring-violet-500/20 transition-all">
+            <span className="pl-4 pr-2 font-medium text-gray-400 text-xl shrink-0">{currencySymbol}</span>
             <input
               {...form.register("amount")}
               placeholder="0.00"
-              className="w-full bg-gray-50 dark:bg-zinc-800 border-none rounded-2xl py-4 pl-8 pr-4 font-black text-xl outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white"
+              className="flex-1 bg-transparent py-4 pr-4 font-medium text-xl outline-none dark:text-white"
             />
           </div>
           {form.formState.errors.amount && (
@@ -135,22 +136,19 @@ export default function ExpenseForm({ categories, initialData, currency = "USD",
             <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block">
               Category
             </label>
-            <div className="relative">
-              <select
-                {...form.register("categoryId")}
-                className={`w-full bg-gray-50 dark:bg-zinc-800 border-none rounded-2xl py-4 px-4 font-bold outline-none focus:ring-2 transition-all dark:text-white appearance-none ${isAutoSuggested ? 'ring-2 ring-violet-500/50' : 'ring-violet-500/20'}`}
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <Controller
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormSelect
+                  options={categories.map((c) => ({ label: c.name, value: c.id }))}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select Category"
+                  highlight={isAutoSuggested}
+                />
+              )}
+            />
           </div>
 
           <div>
@@ -186,15 +184,22 @@ export default function ExpenseForm({ categories, initialData, currency = "USD",
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">
                 Frequency
               </label>
-              <select
-                {...form.register("frequency")}
-                className="w-full bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl py-3 px-3 text-sm font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white appearance-none"
-              >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
+              <Controller
+                control={form.control}
+                name="frequency"
+                render={({ field }) => (
+                  <FormSelect
+                    options={[
+                      { label: "Daily",   value: "daily" },
+                      { label: "Weekly",  value: "weekly" },
+                      { label: "Monthly", value: "monthly" },
+                      { label: "Yearly",  value: "yearly" },
+                    ]}
+                    value={field.value ?? "monthly"}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
           )}
         </div>

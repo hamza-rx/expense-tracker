@@ -1,13 +1,39 @@
 export const SUPPORTED_CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'USD', symbol: '$',  name: 'US Dollar' },
+  { code: 'EUR', symbol: '€',  name: 'Euro' },
+  { code: 'GBP', symbol: '£',  name: 'British Pound' },
+  { code: 'JPY', symbol: '¥',  name: 'Japanese Yen' },
   { code: 'CAD', symbol: 'CA$', name: 'Canadian Dollar' },
   { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee' },
+  { code: 'INR', symbol: '₹',  name: 'Indian Rupee' },
+  { code: 'PKR', symbol: '₨',  name: 'Pakistani Rupee' },
 ];
+
+/**
+ * Exchange rates relative to PKR (1 PKR = X foreign currency).
+ * Expenses are always stored in PKR. When the user selects a different
+ * display currency these rates are used to convert the totals.
+ *
+ * Update these periodically or swap for a live-rate API call if needed.
+ */
+export const PKR_RATES: Record<string, number> = {
+  PKR: 1,
+  USD: 0.0036,   // 1 PKR ≈ 0.0036 USD
+  EUR: 0.0033,
+  GBP: 0.0028,
+  JPY: 0.54,
+  CAD: 0.0049,
+  AUD: 0.0055,
+  INR: 0.30,
+};
+
+/**
+ * Convert an amount stored in PKR to the target display currency.
+ */
+export function convertFromPKR(amountInPKR: number, targetCurrency: string): number {
+  const rate = PKR_RATES[targetCurrency] ?? 1;
+  return amountInPKR * rate;
+}
 
 /**
  * Formats a numeric value as a currency string.

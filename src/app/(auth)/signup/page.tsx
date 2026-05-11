@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
-import { signInAction } from "@/lib/actions/auth.actions";
+import { signUpAction } from "@/lib/actions/auth.actions";
 import Link from "next/link";
 import { Wallet, Eye, EyeOff } from "lucide-react";
 
@@ -21,17 +21,17 @@ const GitHubIcon = () => (
   </svg>
 );
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleCredentialsSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
-      const result = await signInAction(formData);
+      const result = await signUpAction(formData);
       if (result?.error) setError(result.error);
     });
   }
@@ -48,7 +48,7 @@ export default function LoginPage() {
           <div className="absolute -top-16 -left-16 w-56 h-56 bg-violet-500/40 rounded-full" />
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-700/50 rounded-full" />
 
-          {/* Mobile: horizontal layout — logo left, link right */}
+          {/* Mobile: horizontal layout */}
           <div className="relative z-10 w-full flex items-center justify-between md:hidden">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
@@ -56,8 +56,8 @@ export default function LoginPage() {
               </div>
               <span className="text-white font-bold text-sm tracking-wide">ExpenseTracker</span>
             </div>
-            <Link href="/signup" className="text-xs font-bold text-white/80 hover:text-white border border-white/40 px-3 py-1.5 rounded-full transition-all">
-              Sign Up
+            <Link href="/login" className="text-xs font-bold text-white/80 hover:text-white border border-white/40 px-3 py-1.5 rounded-full transition-all">
+              Sign In
             </Link>
           </div>
 
@@ -69,29 +69,29 @@ export default function LoginPage() {
             <span className="text-white/80 text-xs font-bold tracking-widest uppercase">ExpenseTracker</span>
           </div>
 
-          {/* Welcome text — hidden on mobile, shown on desktop */}
+          {/* Welcome text — desktop */}
           <div className="relative z-10 text-center hidden md:block">
-            <h2 className="text-3xl font-black text-white mb-3">Welcome Back!</h2>
+            <h2 className="text-3xl font-black text-white mb-3">Join Us!</h2>
             <p className="text-violet-200 text-sm leading-relaxed max-w-[160px] mx-auto">
-              To stay connected, please login with your personal info
+              Create your free account and start tracking your finances today
             </p>
             <Link
-              href="/signup"
+              href="/login"
               className="mt-6 inline-block px-8 py-2.5 rounded-full border-2 border-white/60 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
             >
-              Sign Up
+              Sign In
             </Link>
           </div>
 
           {/* Mobile: compact welcome text */}
           <div className="relative z-10 text-center mt-4 mb-2 md:hidden">
-            <h2 className="text-xl font-black text-white">Welcome Back!</h2>
-            <p className="text-violet-200 text-xs mt-1">Login with your personal info</p>
+            <h2 className="text-xl font-black text-white">Join Us!</h2>
+            <p className="text-violet-200 text-xs mt-1">Create your free account today</p>
           </div>
 
           {/* Bottom links — desktop only */}
           <div className="relative z-10 hidden md:flex gap-4 text-[10px] text-violet-300 font-bold uppercase tracking-widest">
-            <Link href="/signup" className="hover:text-white transition-colors">Create Here</Link>
+            <Link href="/login" className="hover:text-white transition-colors">Login Here</Link>
             <span className="text-violet-400">|</span>
             <Link href="/" className="hover:text-white transition-colors">Home Here</Link>
           </div>
@@ -101,8 +101,8 @@ export default function LoginPage() {
         <div className="flex-1 bg-white dark:bg-zinc-800 flex flex-col items-center justify-center px-6 py-8 md:px-10 md:py-10">
           <div className="w-full max-w-xs">
             <div className="text-center mb-6">
-              <h1 className="text-2xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tight">welcome</h1>
-              <p className="text-zinc-400 text-sm mt-1">Login to your account to continue</p>
+              <h1 className="text-2xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tight">create account</h1>
+              <p className="text-zinc-400 text-sm mt-1">Sign up to get started for free</p>
             </div>
 
             {/* Error */}
@@ -115,7 +115,16 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleCredentialsSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <input
+                name="name"
+                type="text"
+                required
+                autoComplete="name"
+                placeholder="Full Name..."
+                className="w-full px-4 py-3 rounded-full bg-violet-50 dark:bg-zinc-700 border-0 text-zinc-800 dark:text-white placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+              />
+
               <input
                 name="email"
                 type="email"
@@ -130,7 +139,7 @@ export default function LoginPage() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   placeholder="Password..."
                   className="w-full px-4 py-3 pr-11 rounded-full bg-violet-50 dark:bg-zinc-700 border-0 text-zinc-800 dark:text-white placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                 />
@@ -145,10 +154,6 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <p className="text-right text-xs text-zinc-400 hover:text-violet-600 cursor-pointer transition-colors">
-                Forgot your password?
-              </p>
-
               <button
                 type="submit"
                 disabled={isPending}
@@ -160,9 +165,9 @@ export default function LoginPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
-                    Signing in…
+                    Creating…
                   </span>
-                ) : "LOG IN"}
+                ) : "SIGN UP"}
               </button>
             </form>
 
@@ -173,7 +178,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center">
                 <span className="bg-white dark:bg-zinc-800 px-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                  or continue with
+                  or sign up with
                 </span>
               </div>
             </div>
@@ -197,9 +202,9 @@ export default function LoginPage() {
             </div>
 
             <p className="mt-5 text-center text-xs text-zinc-500 dark:text-zinc-400">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-violet-600 font-bold hover:underline">
-                sign up
+              Already have an account?{" "}
+              <Link href="/login" className="text-violet-600 font-bold hover:underline">
+                sign in
               </Link>
             </p>
 

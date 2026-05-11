@@ -1,10 +1,18 @@
 import { auth } from "@/auth";
 
 export default auth((req) => {
-  const isDashboard = req.nextUrl.pathname.startsWith('/dashboard');
-  if (isDashboard && !req.auth) {
-    const newUrl = new URL("/login", req.nextUrl.origin);
-    return Response.redirect(newUrl);
+  const { nextUrl } = req;
+  const isAuthenticated = !!req.auth;
+
+  const isDashboard = nextUrl.pathname.startsWith('/dashboard');
+  const isAuthPage = nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/signup');
+
+  if (isAuthPage && isAuthenticated) {
+    return Response.redirect(new URL("/dashboard", nextUrl.origin));
+  }
+
+  if (isDashboard && !isAuthenticated) {
+    return Response.redirect(new URL("/login", nextUrl.origin));
   }
 });
 

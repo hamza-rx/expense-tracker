@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Search, Filter, X, ChevronDown, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/lib/actions/expense.actions";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface TransactionListProps {
   expenses: Expense[];
@@ -16,6 +17,11 @@ export default function TransactionList({ expenses, categories }: TransactionLis
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const categoryMap = useMemo(() => new Map(categories.map(c => [c.id, c])), [categories]);
 
@@ -39,13 +45,38 @@ export default function TransactionList({ expenses, categories }: TransactionLis
       });
   }, [expenses, search, selectedCategory, sortBy, sortOrder]);
 
-  async function handleDelete(id: string) {
-    if (!confirm("Are you sure you want to delete this transaction?")) return;
-    await deleteExpenseAction(id);
+  async function handleDeleteConfirm() {
+    if (!itemToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteExpenseAction(itemToDelete);
+      setIsModalOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  function initiateDelete(id: string) {
+    setItemToDelete(id);
+    setIsModalOpen(true);
   }
 
   return (
     <div className="space-y-6">
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Transaction"
+        message="Are you sure you want to delete this transaction? This action cannot be undone."
+        confirmLabel="Delete"
+        isDestructive
+        isLoading={isDeleting}
+      />
       {/* Filters Bar */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
@@ -64,12 +95,12 @@ export default function TransactionList({ expenses, categories }: TransactionLis
           )}
         </div>
 
-        <div className="flex gap-2">
+          <div className="flex gap-2">
           <div className="relative">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="appearance-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl py-3 pl-10 pr-10 text-sm font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white"
+              className="select-styled appearance-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl py-3 pl-10 pr-10 text-sm font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white shadow-sm"
             >
               <option value="all">All Categories</option>
               {categories.map((cat) => (
@@ -77,7 +108,6 @@ export default function TransactionList({ expenses, categories }: TransactionLis
               ))}
             </select>
             <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
 
           <div className="relative">
@@ -88,14 +118,13 @@ export default function TransactionList({ expenses, categories }: TransactionLis
                 setSortBy(field);
                 setSortOrder(order);
               }}
-              className="appearance-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl py-3 pl-4 pr-10 text-sm font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white"
+              className="select-styled appearance-none bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl py-3 pl-4 pr-10 text-sm font-bold outline-none focus:ring-2 ring-violet-500/20 transition-all dark:text-white shadow-sm"
             >
               <option value="date-desc">Newest First</option>
               <option value="date-asc">Oldest First</option>
               <option value="amount-desc">Highest Amount</option>
               <option value="amount-asc">Lowest Amount</option>
             </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
       </div>
@@ -119,32 +148,31 @@ export default function TransactionList({ expenses, categories }: TransactionLis
             </div>
           ) : (
             filteredExpenses.map((exp) => (
-              <div key={exp.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-zinc-800 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
+              <div key={exp.id} className="px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors group">
+                <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-zinc-800 flex items-center justify-center font-bold text-base sm:text-lg group-hover:scale-110 transition-transform shrink-0">
                     {exp.note?.[0] || "💸"}
                   </div>
-                  <div>
-                    <p className="font-bold text-base dark:text-white">{exp.note || "Expense"}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-violet-600 dark:text-violet-400 uppercase tracking-widest bg-violet-50 dark:bg-violet-900/20 px-2 py-0.5 rounded">
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm sm:text-base dark:text-white truncate">{exp.note || "Expense"}</p>
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                      <span className="text-[9px] sm:text-[10px] font-black text-violet-600 dark:text-violet-400 uppercase tracking-widest bg-violet-50 dark:bg-violet-900/20 px-1.5 py-0.5 rounded">
                         {exp.categoryId ? categoryMap.get(exp.categoryId)?.name : "General"}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                        {format(new Date(exp.date), "MMM dd, yyyy")}
-                        {exp.isRecurring && " • Recurring"}
+                      <span className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-widest whitespace-nowrap">
+                        {format(new Date(exp.date), "MMM dd")}
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-6">
-                  <span className="font-black text-lg text-rose-500">
+                <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+                  <span className="font-black text-sm sm:text-lg text-rose-500">
                     -${parseFloat(exp.amount).toFixed(2)}
                   </span>
                   <button 
-                    onClick={() => handleDelete(exp.id)}
-                    className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-rose-500 transition-all hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl"
+                    onClick={() => initiateDelete(exp.id)}
+                    className="p-2 text-gray-400 hover:text-rose-500 transition-all hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl md:opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

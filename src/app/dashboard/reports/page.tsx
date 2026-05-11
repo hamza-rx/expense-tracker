@@ -1,8 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getSpendingByCategory, getMonthlyTrends } from "@/db/queries/reports";
+import { getUserSettings } from "@/db/queries/user";
 import MonthlyChart from "@/components/MonthlyChart";
 import { PieChart, TrendingUp, BarChart3, Download } from "lucide-react";
+import { formatCurrency, convertFromPKR } from "@/lib/currencies";
 
 export default async function ReportsPage() {
   const session = await auth();
@@ -12,10 +14,13 @@ export default async function ReportsPage() {
   }
 
   const userId = session.user.id;
-  const [spendingByCategory, monthlyTrends] = await Promise.all([
+  const [spendingByCategory, monthlyTrends, settings] = await Promise.all([
     getSpendingByCategory(userId),
-    getMonthlyTrends(userId)
+    getMonthlyTrends(userId),
+    getUserSettings(userId),
   ]);
+
+  const currency = settings.currency;
 
   return (
     <div className="p-6 sm:p-10 space-y-10">
@@ -56,7 +61,7 @@ export default async function ReportsPage() {
                         {((item.totalAmount / spendingByCategory.reduce((a, b) => a + b.totalAmount, 0)) * 100).toFixed(1)}% of total
                       </p>
                     </div>
-                    <span className="font-black text-sm">${item.totalAmount.toLocaleString()}</span>
+                    <span className="font-black text-sm">{formatCurrency(convertFromPKR(item.totalAmount, currency), currency)}</span>
                   </div>
                   <div className="w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                     <div 
@@ -87,13 +92,13 @@ export default async function ReportsPage() {
             <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-2xl">
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Avg. Monthly</p>
               <p className="text-xl font-black">
-                ${(monthlyTrends.reduce((a, b) => a + b.totalAmount, 0) / (monthlyTrends.length || 1)).toFixed(2)}
+                {formatCurrency(convertFromPKR(monthlyTrends.reduce((a, b) => a + b.totalAmount, 0) / (monthlyTrends.length || 1), currency), currency)}
               </p>
             </div>
             <div className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-2xl">
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Period</p>
               <p className="text-xl font-black">
-                ${monthlyTrends.reduce((a, b) => a + b.totalAmount, 0).toFixed(2)}
+                {formatCurrency(convertFromPKR(monthlyTrends.reduce((a, b) => a + b.totalAmount, 0), currency), currency)}
               </p>
             </div>
           </div>
