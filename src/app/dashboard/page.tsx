@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import MonthlyChart from "@/components/MonthlyChart";
 import { ArrowUpRight, ArrowDownRight, Zap, Target } from "lucide-react";
 import Link from "next/link";
+import { processRecurringExpenses } from "@/lib/recurring-processor";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -16,6 +17,10 @@ export default async function DashboardPage() {
   }
 
   const userId = session.user.id;
+
+  // Process recurring expenses before fetching data
+  await processRecurringExpenses(userId);
+
   const [expenses, categories, monthlyTrends, budgetStatus] = await Promise.all([
     getExpenses(userId),
     getCategories(userId),
