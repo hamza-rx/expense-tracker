@@ -8,17 +8,21 @@ import { Category } from "@/types";
 import { useState } from "react";
 import { Loader2, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 
 interface BudgetFormProps {
   categories: Category[];
   initialData?: BudgetFormValues & { id: string };
+  currency?: string;
   onSuccess?: () => void;
 }
 
-export default function BudgetForm({ categories, initialData, onSuccess }: BudgetFormProps) {
+export default function BudgetForm({ categories, initialData, currency = "USD", onSuccess }: BudgetFormProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const currencySymbol = SUPPORTED_CURRENCIES.find(c => c.code === currency)?.symbol || "$";
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
@@ -64,7 +68,7 @@ export default function BudgetForm({ categories, initialData, onSuccess }: Budge
             Budget Limit
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">$</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">{currencySymbol}</span>
             <input
               {...form.register("limitAmount")}
               placeholder="0.00"

@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { getCategories } from "@/db/queries/categories";
+import { getUserSettings } from "@/db/queries/user";
 import BudgetForm from "@/components/BudgetForm";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -12,7 +13,10 @@ export default async function NewBudgetPage() {
     redirect("/login");
   }
 
-  const categories = await getCategories(session.user.id);
+  const [categories, settings] = await Promise.all([
+    getCategories(session.user.id),
+    getUserSettings(session.user.id)
+  ]);
 
   return (
     <div className="p-6 sm:p-10 max-w-2xl mx-auto">
@@ -29,7 +33,7 @@ export default async function NewBudgetPage() {
         <p className="text-gray-500 dark:text-zinc-400 font-medium">Set a spending limit for a specific category.</p>
       </div>
 
-      <BudgetForm categories={categories} />
+      <BudgetForm categories={categories} currency={settings.currency} />
     </div>
   );
 }

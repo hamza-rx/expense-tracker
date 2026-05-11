@@ -3,11 +3,14 @@ import { redirect } from "next/navigation";
 import { getExpenses } from "@/db/queries/expenses";
 import { getCategories } from "@/db/queries/categories";
 import { getMonthlyTrends, getBudgetStatus } from "@/db/queries/reports";
+import { getUserSettings } from "@/db/queries/user";
 import { format } from "date-fns";
 import MonthlyChart from "@/components/MonthlyChart";
 import { ArrowUpRight, ArrowDownRight, Zap, Target } from "lucide-react";
 import Link from "next/link";
 import { processRecurringExpenses } from "@/lib/recurring-processor";
+import { formatCurrency } from "@/lib/currencies";
+import CurrencySelector from "@/components/CurrencySelector";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -21,13 +24,15 @@ export default async function DashboardPage() {
   // Process recurring expenses before fetching data
   await processRecurringExpenses(userId);
 
-  const [expenses, categories, monthlyTrends, budgetStatus] = await Promise.all([
+  const [expenses, categories, monthlyTrends, budgetStatus, settings] = await Promise.all([
     getExpenses(userId),
     getCategories(userId),
     getMonthlyTrends(userId),
-    getBudgetStatus(userId)
+    getBudgetStatus(userId),
+    getUserSettings(userId)
   ]);
 
+  const currency = settings.currency;
   const categoryMap = new Map(categories.map(c => [c.id, c]));
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
@@ -48,12 +53,13 @@ export default async function DashboardPage() {
             Welcome back, {session.user?.name?.split(' ')[0]}. Here's your spending summary.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          <CurrencySelector currentCurrency={currency} />
           <Link 
             href="/api/reports/export"
             className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
           >
-            Export Report
+            Export
           </Link>
           <Link 
             href="/dashboard/expenses/new"
@@ -69,14 +75,14 @@ export default async function DashboardPage() {
         {[
           { 
             label: "Total Spent", 
-            value: `$${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+            value: formatCurrency(totalExpenses, currency), 
             icon: Zap,
             color: "text-violet-500",
             bg: "bg-violet-500/10"
           },
           { 
             label: "This Month", 
-            value: `$${currentMonthExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+            value: formatCurrency(currentMonthExpenses, currency), 
             icon: ArrowDownRight,
             color: "text-rose-500",
             bg: "bg-rose-500/10"
@@ -97,7 +103,7 @@ export default async function DashboardPage() {
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Data</span>
             </div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
-            <h2 className="text-3xl font-black dark:text-white">{stat.value}</h2>
+            <h2 className="text-2xl font-black dark:text-white">{stat.value}</h2>
           </div>
         ))}
       </div>

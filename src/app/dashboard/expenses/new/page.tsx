@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getCategories } from "@/db/queries/categories";
+import { getUserSettings } from "@/db/queries/user";
 import ExpenseForm from "@/components/ExpenseForm";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -12,7 +13,10 @@ export default async function NewExpensePage() {
     redirect("/login");
   }
 
-  const categories = await getCategories(session.user.id);
+  const [categories, settings] = await Promise.all([
+    getCategories(session.user.id),
+    getUserSettings(session.user.id)
+  ]);
 
   return (
     <div className="p-6 sm:p-10 max-w-2xl mx-auto">
@@ -28,7 +32,7 @@ export default async function NewExpensePage() {
         <p className="text-gray-500 dark:text-zinc-400 font-medium">Record a new transaction to track your spending.</p>
       </header>
 
-      <ExpenseForm categories={categories} />
+      <ExpenseForm categories={categories} currency={settings.currency} />
     </div>
   );
 }

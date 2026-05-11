@@ -9,19 +9,23 @@ import { useState, useEffect, useRef } from "react";
 import { Loader2, Plus, Sparkles, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { suggestCategory } from "@/lib/categorizer";
+import { SUPPORTED_CURRENCIES } from "@/lib/currencies";
 
 interface ExpenseFormProps {
   categories: Category[];
   initialData?: ExpenseFormValues & { id: string };
+  currency?: string;
   onSuccess?: () => void;
 }
 
-export default function ExpenseForm({ categories, initialData, onSuccess }: ExpenseFormProps) {
+export default function ExpenseForm({ categories, initialData, currency = "USD", onSuccess }: ExpenseFormProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAutoSuggested, setIsAutoSuggested] = useState(false);
   const lastSuggestedId = useRef<string | null>(null);
+
+  const currencySymbol = SUPPORTED_CURRENCIES.find(c => c.code === currency)?.symbol || "$";
 
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
@@ -96,7 +100,7 @@ export default function ExpenseForm({ categories, initialData, onSuccess }: Expe
             Amount
           </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">$</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-gray-400">{currencySymbol}</span>
             <input
               {...form.register("amount")}
               placeholder="0.00"
