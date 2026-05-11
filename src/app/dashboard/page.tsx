@@ -2,10 +2,10 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getExpenses } from "@/db/queries/expenses";
 import { getCategories } from "@/db/queries/categories";
-import { getMonthlyTrends } from "@/db/queries/reports";
+import { getMonthlyTrends, getBudgetStatus } from "@/db/queries/reports";
 import { format } from "date-fns";
 import MonthlyChart from "@/components/MonthlyChart";
-import { ArrowUpRight, ArrowDownRight, Zap } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Zap, Target } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -16,10 +16,11 @@ export default async function DashboardPage() {
   }
 
   const userId = session.user.id;
-  const [expenses, categories, monthlyTrends] = await Promise.all([
+  const [expenses, categories, monthlyTrends, budgetStatus] = await Promise.all([
     getExpenses(userId),
     getCategories(userId),
-    getMonthlyTrends(userId)
+    getMonthlyTrends(userId),
+    getBudgetStatus(userId)
   ]);
 
   const categoryMap = new Map(categories.map(c => [c.id, c]));
@@ -76,9 +77,9 @@ export default async function DashboardPage() {
             bg: "bg-rose-500/10"
           },
           { 
-            label: "Total Transactions", 
-            value: expenses.length.toString(), 
-            icon: ArrowUpRight,
+            label: "Active Budgets", 
+            value: budgetStatus.length.toString(), 
+            icon: Target,
             color: "text-emerald-500",
             bg: "bg-emerald-500/10"
           }
@@ -109,15 +110,46 @@ export default async function DashboardPage() {
           <MonthlyChart data={monthlyTrends} />
         </div>
 
+        {/* Budget Overview Widget */}
+        <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm flex flex-col">
+          <div className="px-6 py-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+            <h3 className="font-bold">Budget Status</h3>
+            <Link href="/dashboard/budgets" className="text-xs font-bold text-violet-600 hover:text-violet-700 transition-colors">Manage</Link>
+          </div>
+          <div className="p-6 space-y-6 flex-1">
+            {budgetStatus.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-gray-400 text-sm font-medium mb-4">No budgets set.</p>
+                <Link href="/dashboard/budgets/new" className="text-xs font-bold bg-gray-50 dark:bg-zinc-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">Set Goal</Link>
+              </div>
+            ) : (
+              budgetStatus.slice(0, 4).map((status) => (
+                <div key={status.id} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-bold dark:text-white">{status.categoryName}</p>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{Math.round(status.percentUsed)}%</p>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-50 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all ${status.percentUsed > 100 ? 'bg-rose-500' : 'bg-violet-500'}`}
+                      style={{ width: `${Math.min(status.percentUsed, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Recent Transactions Section */}
-        <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
+        <div className="lg:col-span-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
           <div className="px-6 py-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
             <h3 className="font-bold">Recent Activity</h3>
-            <button className="text-xs font-bold text-violet-600 hover:text-violet-700 transition-colors">View All</button>
+            <Link href="/dashboard/expenses" className="text-xs font-bold text-violet-600 hover:text-violet-700 transition-colors">View All</Link>
           </div>
-          <div className="divide-y divide-gray-50 dark:divide-zinc-800/50">
+          <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-50 dark:divide-zinc-800/50">
             {expenses.length === 0 ? (
-              <div className="px-6 py-20 text-center">
+              <div className="px-6 py-20 text-center col-span-2">
                 <p className="text-gray-400 text-sm font-medium">No transactions found.</p>
               </div>
             ) : (
