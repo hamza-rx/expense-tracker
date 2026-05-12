@@ -31,12 +31,17 @@ export default async function DashboardPage() {
     getBudgetStatus(userId),
     getUserSettings(userId)
   ]);
-
+    console.log("expenses", expenses)
+    console.log("categories", categories)
+    console.log("monthlyTrends", monthlyTrends)
+    console.log("budgetStatus", budgetStatus)
+    console.log("settings", settings)
   const currency = settings.currency;
   const categoryMap = new Map(categories.map(c => [c.id, c]));
-
+  console.log("categoryMap", categoryMap) 
   // Expenses are stored in PKR. Convert totals to the selected display currency.
   const totalExpensesPKR = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+  console.log("totalExpensesPKR", totalExpensesPKR) 
   const currentMonthExpensesPKR = expenses
     .filter(exp => {
       const date = new Date(exp.date);
@@ -44,12 +49,12 @@ export default async function DashboardPage() {
       return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     })
     .reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
-
+   console.log("currentMonthExpensesPKR", currentMonthExpensesPKR) 
   const totalExpenses = convertFromPKR(totalExpensesPKR, currency);
   const currentMonthExpenses = convertFromPKR(currentMonthExpensesPKR, currency);
-
+  
   const convertedTrends = monthlyTrends.map(t => ({
-    ...t,
+    ...t, 
     totalAmount: convertFromPKR(t.totalAmount, currency)
   }));
 

@@ -1,4 +1,7 @@
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
+import Navbar from "@/components/Navbar";
+import CtaBanner from "@/components/CtaBanner";
+import Footer from "@/components/Footer";
 import Link from "next/link";
 import {
   Wallet, TrendingUp, Target, ShieldCheck, Zap,
@@ -35,65 +38,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans selection:bg-violet-100 dark:selection:bg-violet-900/30">
 
-      {/* ── Navbar ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 px-4 sm:px-6 py-3">
-        <div className="max-w-7xl mx-auto flex items-center gap-3">
-
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-white" />
-            </div>
-            <span className="hidden sm:block font-bold text-base tracking-tight dark:text-white">
-              ExpenseTracker
-            </span>
-          </Link>
-
-          {/* Nav links — desktop center */}
-          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            {[
-              { label: "Features",     href: "#features" },
-              { label: "How it works", href: "#how-it-works" },
-              { label: "Dashboard",    href: "#dashboard" },
-            ].map((item) => (
-              <a key={item.href} href={item.href}
-                className="px-3 py-2 text-sm font-bold text-gray-500 dark:text-zinc-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-xl transition-all">
-                {item.label}
-              </a>
-            ))}
-          </nav>
-
-          {/* CTAs — always right */}
-          <div className="flex items-center gap-2 ml-auto shrink-0">
-            {session ? (
-              <>
-                <Link href="/dashboard"
-                  className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-violet-500/20 active:scale-95 transition-all">
-                  Dashboard
-                </Link>
-                <form action={async () => { "use server"; await signOut(); }}>
-                  <button type="submit"
-                    className="px-3 py-2 text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all">
-                    Logout
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <Link href="/login"
-                  className="px-3 py-2 text-sm font-bold text-gray-500 dark:text-zinc-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-xl transition-all">
-                  Login
-                </Link>
-                <Link href="/signup"
-                  className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-violet-500/20 active:scale-95 transition-all">
-                  <span className="hidden sm:inline">Get Started</span>
-                  <span className="sm:hidden">Sign Up</span>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="pt-14">
 
@@ -297,87 +242,10 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ── CTA Banner ── */}
-        <section className="px-4 sm:px-6 pb-16 sm:pb-24">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative rounded-2xl sm:rounded-3xl bg-violet-600 p-8 sm:p-12 text-center overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-600/40 rounded-full blur-3xl" />
-              <div className="relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-violet-200 mb-3">Get started today</p>
-                <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tight mb-3 sm:mb-4">
-                  Ready to take control?
-                </h2>
-                <p className="text-violet-200 font-medium mb-7 sm:mb-10 max-w-sm mx-auto text-sm sm:text-base">
-                  Join thousands of people who track smarter and spend better with ExpenseTracker.
-                </p>
-                <Link href={session ? "/dashboard" : "/signup"}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 bg-white text-violet-700 text-sm font-black uppercase tracking-widest rounded-xl sm:rounded-2xl hover:bg-violet-50 shadow-xl active:scale-95 transition-all">
-                  {session ? "Go to Dashboard" : "Create Free Account"}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        <CtaBanner />
       </main>
 
-      {/* ── Footer ── */}
-      <footer className="px-4 sm:px-6 py-10 sm:py-16 bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-10 mb-8 sm:mb-10">
-
-            {/* Brand */}
-            <div className="max-w-xs">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
-                  <Wallet className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-black text-base tracking-tight dark:text-white">
-                  Expense<span className="text-violet-600">Tracker</span>
-                </span>
-              </div>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium leading-relaxed">
-                A precision tool for tracking your finances. Minimal, fast, and private.
-              </p>
-            </div>
-
-            {/* Links */}
-            <div className="grid grid-cols-3 gap-6 sm:gap-12 w-full sm:w-auto">
-              {[
-                { cat: "Product", links: ["Features", "Pricing", "Changelog"] },
-                { cat: "Legal",   links: ["Privacy", "Terms", "Security"] },
-                { cat: "Company", links: ["About", "Blog", "Contact"] },
-              ].map((col) => (
-                <div key={col.cat} className="flex flex-col gap-2.5 sm:gap-3">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-900 dark:text-white">{col.cat}</h4>
-                  {col.links.map((link) => (
-                    <a key={link} href="#"
-                      className="text-xs sm:text-sm text-zinc-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors font-medium">
-                      {link}
-                    </a>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom */}
-          <div className="pt-6 sm:pt-8 border-t border-zinc-100 dark:border-zinc-900 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
-            <p className="text-[10px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest text-center sm:text-left">
-              © 2026 ExpenseTracker. All rights reserved.
-            </p>
-            <div className="flex gap-4 sm:gap-6">
-              {["GitHub", "Twitter", "LinkedIn"].map((social) => (
-                <a key={social} href="#"
-                  className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                  {social}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

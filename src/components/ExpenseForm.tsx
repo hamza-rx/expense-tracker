@@ -2,7 +2,8 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { expenseSchema, ExpenseFormValues } from "@/lib/validations";
+import { z } from "zod";
+import { expenseSchema } from "@/lib/validations";
 import { createExpenseAction, updateExpenseAction } from "@/lib/actions/expense.actions";
 import { Category } from "@/types";
 import { useState, useEffect, useRef } from "react";
@@ -14,7 +15,7 @@ import FormSelect from "@/components/FormSelect";
 
 interface ExpenseFormProps {
   categories: Category[];
-  initialData?: ExpenseFormValues & { id: string };
+  initialData?: z.input<typeof expenseSchema> & { id: string };
   currency?: string;
   onSuccess?: () => void;
 }
@@ -28,7 +29,7 @@ export default function ExpenseForm({ categories, initialData, currency = "USD",
 
   const currencySymbol = SUPPORTED_CURRENCIES.find(c => c.code === currency)?.symbol || "$";
 
-  const form = useForm<ExpenseFormValues>({
+  const form = useForm<z.input<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: initialData || {
       amount: "",
@@ -66,7 +67,7 @@ export default function ExpenseForm({ categories, initialData, currency = "USD",
     }
   }, [categoryIdValue, isAutoSuggested]);
 
-  async function onSubmit(values: ExpenseFormValues) {
+  async function onSubmit(values: z.output<typeof expenseSchema>) {
     setIsPending(true);
     setError(null);
 
@@ -142,7 +143,7 @@ export default function ExpenseForm({ categories, initialData, currency = "USD",
               render={({ field }) => (
                 <FormSelect
                   options={categories.map((c) => ({ label: c.name, value: c.id }))}
-                  value={field.value}
+                  value={field.value || ""}
                   onChange={field.onChange}
                   placeholder="Select Category"
                   highlight={isAutoSuggested}
