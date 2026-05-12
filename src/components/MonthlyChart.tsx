@@ -63,11 +63,11 @@ export default function MonthlyChart({ data, currency = "USD" }: MonthlyChartPro
               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
               padding: '12px'
             }}
-            formatter={(value: number) => [
+            formatter={(value: any) => [
               new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: currency,
-              }).format(value),
+              }).format(Number(value)),
               "Total Spent"
             ]}
           />

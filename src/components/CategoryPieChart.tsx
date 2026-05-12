@@ -43,11 +43,11 @@ export default function CategoryPieChart({ data, currency = "USD" }: CategoryPie
               fontSize: '12px',
               fontWeight: 'bold'
             }}
-            formatter={(value: number) => [
+            formatter={(value: any) => [
               new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: currency,
-              }).format(value),
+              }).format(Number(value)),
               "Spent"
             ]}
           />

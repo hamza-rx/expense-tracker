@@ -28,7 +28,7 @@ export async function signUpAction(formData: FormData) {
 
   const parsed = signUpSchema.safeParse(raw);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: parsed.error.issues[0].message };
   }
 
   const { name, email, password } = parsed.data;
@@ -75,7 +75,7 @@ export async function signInAction(formData: FormData) {
 
   const parsed = signInSchema.safeParse(raw);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    return { error: parsed.error.issues[0].message };
   }
 
   try {
