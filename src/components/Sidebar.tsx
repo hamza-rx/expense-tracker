@@ -49,7 +49,7 @@ export default function Sidebar({ userName, userEmail, userImage, isOpen, onClos
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-black transition-all duration-300 ease-in-out md:relative
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-black transition-all duration-300 ease-in-out md:relative md:shrink-0
           ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
           ${collapsed ? "md:w-[72px]" : "md:w-64"} w-64`}
       >

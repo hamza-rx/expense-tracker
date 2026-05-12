@@ -2,9 +2,11 @@ import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import { getExpenseById } from "@/db/queries/expenses";
 import { getCategories } from "@/db/queries/categories";
+import { getUserSettings } from "@/db/queries/user";
 import ExpenseForm from "@/components/ExpenseForm";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { convertFromPKR } from "@/lib/currencies";
 
 export default async function EditExpensePage({
   params,
@@ -18,20 +20,23 @@ export default async function EditExpensePage({
     redirect("/login");
   }
 
-  const [expense, categories] = await Promise.all([
+  const [expense, categories, settings] = await Promise.all([
     getExpenseById(id, session.user.id),
     getCategories(session.user.id),
+    getUserSettings(session.user.id)
   ]);
 
   if (!expense) {
     notFound();
   }
 
-  // Transform database model to form values
+  const currency = settings.currency;
+
+  // Transform database model to form values with currency conversion
   const initialData = {
     ...expense,
     date: new Date(expense.date).toISOString().split("T")[0],
-    amount: expense.amount.toString(),
+    amount: convertFromPKR(parseFloat(expense.amount), currency).toString(),
   };
 
   return (
@@ -48,7 +53,7 @@ export default async function EditExpensePage({
         <p className="text-gray-500 dark:text-zinc-400 font-medium">Update the details of your transaction.</p>
       </header>
 
-      <ExpenseForm categories={categories} initialData={initialData} />
+      <ExpenseForm categories={categories} initialData={initialData} currency={currency} />
     </div>
   );
 }

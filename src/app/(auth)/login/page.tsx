@@ -37,29 +37,33 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-screen flex items-center justify-center bg-gray-100 dark:bg-zinc-900 p-4">
-      {/* Card — stacks on mobile, side-by-side on md+ */}
-      <div className="flex flex-col md:flex-row w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen w-full bg-gray-100 dark:bg-zinc-900 flex flex-col md:items-center md:justify-center md:p-4">
 
-        {/* ── Left / Top panel (violet) ── */}
-        <div className="relative md:w-[42%] bg-violet-600 flex flex-col items-center justify-between overflow-hidden shrink-0
-                        py-8 px-6 md:py-10 md:px-6">
-          {/* Decorative circles */}
+      {/* ── Mobile: full-screen stacked layout ── */}
+      {/* ── Desktop: centered card ── */}
+      <div className="flex flex-col md:flex-row w-full md:max-w-3xl md:rounded-3xl md:shadow-2xl md:overflow-hidden flex-1 md:flex-none">
+
+        {/* Violet panel — compact strip on mobile, full sidebar on desktop */}
+        <div className="relative bg-violet-600 overflow-hidden shrink-0 md:w-[42%]
+                        px-5 py-5 md:px-6 md:py-10
+                        flex flex-row md:flex-col items-center justify-between md:justify-between">
           <div className="absolute -top-16 -left-16 w-56 h-56 bg-violet-500/40 rounded-full" />
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-700/50 rounded-full" />
 
-          {/* Mobile: horizontal layout — logo left, link right */}
-          <div className="relative z-10 w-full flex items-center justify-between md:hidden">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-                <Wallet className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-white font-bold text-sm tracking-wide">ExpenseTracker</span>
+          {/* Mobile strip: logo + tagline + link */}
+          <div className="relative z-10 flex items-center gap-2.5 md:hidden">
+            <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+              <Wallet className="w-4 h-4 text-white" />
             </div>
-            <Link href="/signup" className="text-xs font-bold text-white/80 hover:text-white border border-white/40 px-3 py-1.5 rounded-full transition-all">
-              Sign Up
-            </Link>
+            <div>
+              <p className="text-white font-bold text-sm leading-none">ExpenseTracker</p>
+              <p className="text-violet-200 text-[10px] mt-0.5">Welcome back!</p>
+            </div>
           </div>
+          <Link href="/signup"
+            className="relative z-10 md:hidden text-[11px] font-bold text-white/80 hover:text-white border border-white/40 px-3 py-1.5 rounded-full transition-all shrink-0">
+            Sign Up
+          </Link>
 
           {/* Desktop: logo top */}
           <div className="relative z-10 hidden md:flex flex-col items-center gap-2">
@@ -69,27 +73,19 @@ export default function LoginPage() {
             <span className="text-white/80 text-xs font-bold tracking-widest uppercase">ExpenseTracker</span>
           </div>
 
-          {/* Welcome text — hidden on mobile, shown on desktop */}
+          {/* Desktop: welcome text */}
           <div className="relative z-10 text-center hidden md:block">
             <h2 className="text-3xl font-black text-white mb-3">Welcome Back!</h2>
             <p className="text-violet-200 text-sm leading-relaxed max-w-[160px] mx-auto">
               To stay connected, please login with your personal info
             </p>
-            <Link
-              href="/signup"
-              className="mt-6 inline-block px-8 py-2.5 rounded-full border-2 border-white/60 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
-            >
+            <Link href="/signup"
+              className="mt-6 inline-block px-8 py-2.5 rounded-full border-2 border-white/60 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
               Sign Up
             </Link>
           </div>
 
-          {/* Mobile: compact welcome text */}
-          <div className="relative z-10 text-center mt-4 mb-2 md:hidden">
-            <h2 className="text-xl font-black text-white">Welcome Back!</h2>
-            <p className="text-violet-200 text-xs mt-1">Login with your personal info</p>
-          </div>
-
-          {/* Bottom links — desktop only */}
+          {/* Desktop: bottom links */}
           <div className="relative z-10 hidden md:flex gap-4 text-[10px] text-violet-300 font-bold uppercase tracking-widest">
             <Link href="/signup" className="hover:text-white transition-colors">Create Here</Link>
             <span className="text-violet-400">|</span>
@@ -97,15 +93,16 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* ── Right / Bottom panel (form) ── */}
-        <div className="flex-1 bg-white dark:bg-zinc-800 flex flex-col items-center justify-center px-6 py-8 md:px-10 md:py-10">
-          <div className="w-full max-w-xs">
+        {/* Form panel */}
+        <div className="flex-1 bg-white dark:bg-zinc-800 flex flex-col items-center md:justify-center
+                        px-5 pt-8 pb-10 sm:px-8 md:px-10 md:py-10">
+          <div className="w-full max-w-sm">
+
             <div className="text-center mb-6">
-              <h1 className="text-2xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tight">welcome</h1>
+              <h1 className="text-2xl sm:text-3xl font-black text-zinc-800 dark:text-white tracking-tight">welcome</h1>
               <p className="text-zinc-400 text-sm mt-1">Login to your account to continue</p>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="mb-4 flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 text-xs px-3 py-2.5 rounded-xl">
                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -116,44 +113,23 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleCredentialsSubmit} className="space-y-3">
-              <input
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="Email..."
-                className="w-full px-4 py-3 rounded-full bg-violet-50 dark:bg-zinc-700 border-0 text-zinc-800 dark:text-white placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
-              />
+              <input name="email" type="email" required autoComplete="email" placeholder="Email..."
+                className="w-full px-4 py-3 rounded-full bg-violet-50 dark:bg-zinc-700 border-0 text-zinc-800 dark:text-white placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all" />
 
               <div className="relative">
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  autoComplete="current-password"
-                  placeholder="Password..."
-                  className="w-full px-4 py-3 pr-11 rounded-full bg-violet-50 dark:bg-zinc-700 border-0 text-zinc-800 dark:text-white placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
+                <input name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" placeholder="Password..."
+                  className="w-full px-4 py-3 pr-11 rounded-full bg-violet-50 dark:bg-zinc-700 border-0 text-zinc-800 dark:text-white placeholder:text-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-violet-600 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
+                  aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
-              <p className="text-right text-xs text-zinc-400 hover:text-violet-600 cursor-pointer transition-colors">
-                Forgot your password?
-              </p>
+              <p className="text-right text-xs text-zinc-400 hover:text-violet-600 transition-colors">Forgot your password?</p>
 
-              <button
-                type="submit"
-                disabled={isPending}
-                className="w-full py-3 rounded-full bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-              >
+              <button type="submit" disabled={isPending}
+                className="w-full py-3 rounded-full bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm transition-all shadow-lg shadow-violet-500/25 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed">
                 {isPending ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -166,43 +142,30 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Divider */}
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-white dark:bg-zinc-800 px-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                  or continue with
-                </span>
+                <span className="bg-white dark:bg-zinc-800 px-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">or continue with</span>
               </div>
             </div>
 
-            {/* OAuth */}
             <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-full bg-violet-50 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-violet-100 dark:hover:bg-zinc-600 active:scale-[0.98] transition-all"
-              >
+              <button type="button" onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-full bg-violet-50 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-violet-100 dark:hover:bg-zinc-600 active:scale-[0.98] transition-all">
                 <GoogleIcon /> Google
               </button>
-              <button
-                type="button"
-                onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-full bg-violet-50 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-violet-100 dark:hover:bg-zinc-600 active:scale-[0.98] transition-all"
-              >
+              <button type="button" onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+                className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-full bg-violet-50 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-semibold hover:bg-violet-100 dark:hover:bg-zinc-600 active:scale-[0.98] transition-all">
                 <GitHubIcon /> GitHub
               </button>
             </div>
 
             <p className="mt-5 text-center text-xs text-zinc-500 dark:text-zinc-400">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-violet-600 font-bold hover:underline">
-                sign up
-              </Link>
+              <Link href="/signup" className="text-violet-600 font-bold hover:underline">sign up</Link>
             </p>
-
             <p className="mt-2 text-center text-xs text-zinc-400 dark:text-zinc-600">
               <Link href="/" className="hover:text-violet-600 transition-colors">← Back to home</Link>
             </p>

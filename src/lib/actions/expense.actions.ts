@@ -2,8 +2,10 @@
 
 import { auth } from "@/auth";
 import { createExpense, updateExpense, deleteExpense } from "@/db/queries/expenses";
+import { getUserSettings } from "@/db/queries/user";
 import { expenseSchema, ExpenseFormValues } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import { convertToPKR } from "@/lib/currencies";
 
 export async function createExpenseAction(values: ExpenseFormValues) {
   const session = await auth();
@@ -20,8 +22,12 @@ export async function createExpenseAction(values: ExpenseFormValues) {
   }
 
   try {
+    const settings = await getUserSettings(session.user.id);
+    const amountInPKR = convertToPKR(parseFloat(validatedFields.data.amount), settings.currency);
+
     await createExpense({
       ...validatedFields.data,
+      amount: amountInPKR.toString(),
       userId: session.user.id,
     });
 
@@ -41,7 +47,14 @@ export async function updateExpenseAction(id: string, values: Partial<ExpenseFor
   }
 
   try {
-    await updateExpense(id, session.user.id, values);
+    const settings = await getUserSettings(session.user.id);
+    const updateData = { ...values };
+
+    if (values.amount) {
+      updateData.amount = convertToPKR(parseFloat(values.amount), settings.currency).toString();
+    }
+
+    await updateExpense(id, session.user.id, updateData);
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {

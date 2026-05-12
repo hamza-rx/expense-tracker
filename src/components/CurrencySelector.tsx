@@ -40,7 +40,7 @@ export default function CurrencySelector({ currentCurrency }: { currentCurrency:
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-2xl z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-2xl z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-100">
             <div className="px-3 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Currency</div>
             {SUPPORTED_CURRENCIES.map((currency) => (
               <button

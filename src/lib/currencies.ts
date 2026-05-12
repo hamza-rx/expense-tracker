@@ -36,6 +36,15 @@ export function convertFromPKR(amountInPKR: number, targetCurrency: string): num
 }
 
 /**
+ * Convert an amount from a display currency back to PKR for storage.
+ */
+export function convertToPKR(amount: number, fromCurrency: string): number {
+  const rate = PKR_RATES[fromCurrency] ?? 1;
+  if (rate === 0) return amount;
+  return amount / rate;
+}
+
+/**
  * Formats a numeric value as a currency string.
  */
 export function formatCurrency(amount: number | string, currencyCode: string = 'USD') {

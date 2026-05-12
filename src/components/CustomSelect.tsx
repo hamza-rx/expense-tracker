@@ -38,7 +38,7 @@ export default function CustomSelect({ options, value, onChange, className = "" 
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl px-4 py-2 text-sm font-bold text-zinc-800 dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 shadow-sm min-w-[140px] justify-between"
+        className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm font-bold text-zinc-800 dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 shadow-sm whitespace-nowrap justify-between"
       >
         <span>{selected.label}</span>
         <ChevronDown

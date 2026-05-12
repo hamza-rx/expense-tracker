@@ -2,8 +2,10 @@
 
 import { auth } from "@/auth";
 import { createBudget, updateBudget, deleteBudget } from "@/db/queries/budgets";
+import { getUserSettings } from "@/db/queries/user";
 import { budgetSchema, BudgetFormValues } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import { convertToPKR } from "@/lib/currencies";
 
 export async function createBudgetAction(values: BudgetFormValues) {
   const session = await auth();
@@ -19,8 +21,12 @@ export async function createBudgetAction(values: BudgetFormValues) {
   }
 
   try {
+    const settings = await getUserSettings(session.user.id);
+    const amountInPKR = convertToPKR(parseFloat(validatedFields.data.limitAmount), settings.currency);
+
     await createBudget({
       ...validatedFields.data,
+      limitAmount: amountInPKR.toString(),
       userId: session.user.id,
     });
 
@@ -41,7 +47,14 @@ export async function updateBudgetAction(id: string, values: Partial<BudgetFormV
   }
 
   try {
-    await updateBudget(id, session.user.id, values);
+    const settings = await getUserSettings(session.user.id);
+    const updateData = { ...values };
+
+    if (values.limitAmount) {
+      updateData.limitAmount = convertToPKR(parseFloat(values.limitAmount), settings.currency).toString();
+    }
+
+    await updateBudget(id, session.user.id, updateData);
     revalidatePath("/dashboard/budgets");
     revalidatePath("/dashboard");
     return { success: true };

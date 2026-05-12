@@ -1,10 +1,12 @@
 import { auth } from "@/auth";
 import { getCategories } from "@/db/queries/categories";
 import { getBudgetById } from "@/db/queries/budgets";
+import { getUserSettings } from "@/db/queries/user";
 import BudgetForm from "@/components/BudgetForm";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { convertFromPKR } from "@/lib/currencies";
 
 export default async function EditBudgetPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -14,14 +16,18 @@ export default async function EditBudgetPage({ params }: { params: Promise<{ id:
     redirect("/login");
   }
 
-  const [categories, budget] = await Promise.all([
+  const [categories, budget, settings] = await Promise.all([
     getCategories(session.user.id),
-    getBudgetById(id, session.user.id)
+    getBudgetById(id, session.user.id),
+    getUserSettings(session.user.id)
   ]);
 
   if (!budget) {
     notFound();
   }
+
+  const currency = settings.currency;
+  const convertedLimit = convertFromPKR(parseFloat(budget.limitAmount), currency).toString();
 
   return (
     <div className="p-6 sm:p-10 max-w-2xl mx-auto">
@@ -40,8 +46,10 @@ export default async function EditBudgetPage({ params }: { params: Promise<{ id:
 
       <BudgetForm 
         categories={categories} 
+        currency={currency}
         initialData={{
           ...budget,
+          limitAmount: convertedLimit,
           period: (budget.period as "monthly" | "yearly") || "monthly"
         }} 
       />

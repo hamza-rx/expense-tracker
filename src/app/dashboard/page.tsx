@@ -48,34 +48,40 @@ export default async function DashboardPage() {
   const totalExpenses = convertFromPKR(totalExpensesPKR, currency);
   const currentMonthExpenses = convertFromPKR(currentMonthExpensesPKR, currency);
 
+  const convertedTrends = monthlyTrends.map(t => ({
+    ...t,
+    totalAmount: convertFromPKR(t.totalAmount, currency)
+  }));
+
   return (
-    <div className="p-6 sm:p-10 space-y-10">
-      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2">Overview</h1>
-          <p className="text-gray-500 dark:text-zinc-400 font-medium">
-            Welcome back, {session.user?.name?.split(' ')[0]}. Here's your spending summary.
+    <div className="p-4 sm:p-6 lg:p-10 space-y-5 sm:space-y-8">
+      {/* Header — title left, actions right. On very small screens stack, on md+ always row */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight mb-0.5">Overview</h1>
+          <p className="text-gray-500 dark:text-zinc-400 font-medium text-xs sm:text-sm truncate">
+            Welcome back, {session.user?.name?.split(' ')[0]}. Here&apos;s your spending summary.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <CurrencySelector currentCurrency={currency} />
           <Link 
             href="/api/reports/export"
-            className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800"
+            className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all hover:bg-gray-50 dark:hover:bg-zinc-800 whitespace-nowrap"
           >
             Export
           </Link>
           <Link 
             href="/dashboard/expenses/new"
-            className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-violet-500/20 active:scale-95"
+            className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-lg shadow-violet-500/20 active:scale-95 whitespace-nowrap"
           >
-            + Add Expense
+            + Add
           </Link>
         </div>
       </header>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Stats Grid — 1 col on mobile, 3 on md+ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         {[
           { 
             label: "Total Spent", 
@@ -99,22 +105,22 @@ export default async function DashboardPage() {
             bg: "bg-emerald-500/10"
           }
         ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-3xl shadow-sm">
-            <div className="flex items-center justify-between mb-4">
+          <div key={i} className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-sm">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className={`p-2 rounded-xl ${stat.bg}`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                <stat.icon className={`w-5 h-5 ${stat.icon === Zap ? 'w-5 h-5' : 'w-5 h-5'} ${stat.color}`} />
               </div>
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Data</span>
             </div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
-            <h2 className="text-2xl font-black dark:text-white">{stat.value}</h2>
+            <h2 className="text-xl sm:text-2xl font-black dark:text-white">{stat.value}</h2>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Chart Section */}
-        <SpendingTrendCard data={monthlyTrends} />
+        <SpendingTrendCard data={convertedTrends} currency={currency} />
 
         {/* Budget Overview Widget */}
         <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm flex flex-col">
@@ -166,7 +172,7 @@ export default async function DashboardPage() {
                       <span className="text-lg">💸</span>
                     </div>
                     <div>
-                      <p className="font-bold text-sm dark:text-white truncate max-w-[120px]">{exp.note || "Expense"}</p>
+                      <p className="font-bold text-sm dark:text-white truncate max-w-[100px] sm:max-w-[160px]">{exp.note || "Expense"}</p>
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                         {exp.categoryId ? categoryMap.get(exp.categoryId)?.name : "General"} • {format(new Date(exp.date), "MMM dd")}
                       </p>

@@ -8,9 +8,10 @@ interface CategoryPieChartProps {
     totalAmount: number;
     categoryColor: string | null;
   }[];
+  currency?: string;
 }
 
-export default function CategoryPieChart({ data }: CategoryPieChartProps) {
+export default function CategoryPieChart({ data, currency = "USD" }: CategoryPieChartProps) {
   const chartData = data.map(item => ({
     name: item.categoryName || "Uncategorized",
     value: item.totalAmount,
@@ -42,6 +43,13 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
               fontSize: '12px',
               fontWeight: 'bold'
             }}
+            formatter={(value: number) => [
+              new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currency,
+              }).format(value),
+              "Spent"
+            ]}
           />
           <Legend 
             verticalAlign="bottom" 
